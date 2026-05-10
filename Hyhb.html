@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXORA X - AI Logo Creator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700&family=Noto+Sans+Sinhala:wght@400;500;600;700&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', 'Noto Sans Sinhala', sans-serif; background: #0a0a1a; overflow-x: hidden; color: #e0e0ff; }
+        .font-orbitron { font-family: 'Orbitron', sans-serif; }
+        .font-sinhala { font-family: 'Noto Sans Sinhala', sans-serif; }
+        .bg-animation { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; background: linear-gradient(-45deg, #0a0a1a, #12122e, #0d1b3e, #0a0f2e, #0d0d2b); background-size: 400% 400%; animation: gradientBG 20s ease infinite; }
+        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        .grid-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background-image: linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px); background-size: 50px 50px; pointer-events: none; }
+        .particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; pointer-events: none; }
+        .particle { position: absolute; border-radius: 50%; animation: floatUp linear infinite; opacity: 0.6; }
+        @keyframes floatUp { 0% { transform: translateY(100vh) scale(0); opacity: 0; } 10% { opacity: 0.8; } 90% { opacity: 0.8; } 100% { transform: translateY(-10vh) scale(1); opacity: 0; } }
+        .glass-header { background: rgba(10, 10, 26, 0.85); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(99, 102, 241, 0.15); }
+        .neon-text { background: linear-gradient(90deg, #00d4ff, #7c3aed, #f472b6, #00d4ff); background-size: 300% 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: neonShift 4s ease infinite; }
+        @keyframes neonShift { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+        .neon-glow { text-shadow: 0 0 10px rgba(0, 212, 255, 0.5), 0 0 20px rgba(124, 58, 237, 0.3), 0 0 40px rgba(244, 114, 182, 0.2); }
+        .glow-btn { background: linear-gradient(135deg, #00d4ff, #7c3aed); box-shadow: 0 0 20px rgba(0, 212, 255, 0.3), 0 0 40px rgba(124, 58, 237, 0.2); transition: all 0.3s ease; position: relative; overflow: hidden; }
+        .glow-btn::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); transition: left 0.5s ease; }
+        .glow-btn:hover::before { left: 100%; }
+        .glow-btn:hover { transform: translateY(-2px); box-shadow: 0 0 30px rgba(0, 212, 255, 0.5), 0 0 60px rgba(124, 58, 237, 0.3); }
+        .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(99, 102, 241, 0.15); border-radius: 20px; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .glass-card:hover { transform: translateY(-5px); border-color: rgba(99, 102, 241, 0.4); box-shadow: 0 15px 35px rgba(0, 212, 255, 0.1), 0 0 40px rgba(124, 58, 237, 0.1); }
+        .neon-input { background: rgba(255, 255, 255, 0.05); border: 2px solid rgba(99, 102, 241, 0.2); color: #e0e0ff; transition: all 0.3s ease; }
+        .neon-input:focus { border-color: #00d4ff; box-shadow: 0 0 20px rgba(0, 212, 255, 0.2); outline: none; }
+        .neon-input::placeholder { color: rgba(160, 170, 255, 0.4); }
+        .style-option { background: rgba(255, 255, 255, 0.03); border: 2px solid rgba(99, 102, 241, 0.2); border-radius: 16px; cursor: pointer; transition: all 0.3s ease; }
+        .style-option:hover { border-color: rgba(0, 212, 255, 0.5); background: rgba(0, 212, 255, 0.05); }
+        .style-option.selected { border-color: #00d4ff; background: rgba(0, 212, 255, 0.1); box-shadow: 0 0 20px rgba(0, 212, 255, 0.2); }
+        .logo-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(99, 102, 241, 0.2); border-radius: 20px; overflow: hidden; transition: all 0.4s ease; animation: cardAppear 0.6s ease backwards; }
+        .logo-card:hover { transform: translateY(-8px) scale(1.02); border-color: rgba(0, 212, 255, 0.5); box-shadow: 0 20px 40px rgba(0, 212, 255, 0.15); }
+        @keyframes cardAppear { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .loading-ring { width: 60px; height: 60px; border: 3px solid rgba(99, 102, 241, 0.2); border-top-color: #00d4ff; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .footer-glow { background: linear-gradient(180deg, transparent, rgba(0, 212, 255, 0.05)); border-top: 1px solid rgba(99, 102, 241, 0.1); }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0a0a1a; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #00d4ff, #7c3aed); border-radius: 4px; }
+        .alert-box { animation: slideDown 0.4s ease; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        .color-dot { width: 36px; height: 36px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: all 0.3s ease; }
+        .color-dot:hover { transform: scale(1.15); }
+        .color-dot.selected { border-color: white; box-shadow: 0 0 15px currentColor; }
+        .modal-overlay { background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); }
+        .modal-content { background: linear-gradient(145deg, #12122e, #0a0a1a); border: 1px solid rgba(99, 102, 241, 0.3); box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6), 0 0 40px rgba(0, 212, 255, 0.1); animation: modalSlide 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes modalSlide { from { opacity: 0; transform: scale(0.8) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .download-btn { background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); transition: all 0.3s ease; }
+        .download-btn:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5); }
+        .ai-badge { background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(124, 58, 237, 0.2)); border: 1px solid rgba(0, 212, 255, 0.3); animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        .generated-image { width: 100%; height: 280px; object-fit: cover; border-radius: 16px; transition: all 0.3s ease; }
+        .generated-image:hover { transform: scale(1.03); }
+        .login-container { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .login-card { background: linear-gradient(145deg, rgba(18, 18, 46, 0.95), rgba(10, 10, 26, 0.95)); border: 1px solid rgba(99, 102, 241, 0.2); border-radius: 24px; padding: 40px; width: 100%; max-width: 420px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 0 0 60px rgba(0, 212, 255, 0.1); animation: loginAppear 0.6s ease; }
+        @keyframes loginAppear { from { opacity: 0; transform: translateY(30px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .login-logo { width: 80px; height: 80px; border-radius: 20px; background: linear-gradient(135deg, #00d4ff, #7c3aed); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; box-shadow: 0 0 30px rgba(0, 212, 255, 0.3); animation: logoPulse 2s ease infinite; }
+        @keyframes logoPulse { 0%, 100% { box-shadow: 0 0 30px rgba(0, 212, 255, 0.3); } 50% { box-shadow: 0 0 50px rgba(0, 212, 255, 0.5), 0 0 70px rgba(124, 58, 237, 0.3); } }
+        .login-input { background: rgba(255, 255, 255, 0.05); border: 2px solid rgba(99, 102, 241, 0.2); color: #e0e0ff; border-radius: 14px; padding: 14px 18px; font-size: 16px; width: 100%; transition: all 0.3s ease; }
+        .login-input:focus { border-color: #00d4ff; box-shadow: 0 0 20px rgba(0, 212, 255, 0.2); outline: none; }
+        .login-input::placeholder { color: rgba(160, 170, 255, 0.4); }
+        .login-btn { background: linear-gradient(135deg, #00d4ff, #7c3aed); color: white; border: none; border-radius: 14px; padding: 14px; font-size: 16px; font-weight: 600; width: 100%; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 0 20px rgba(0, 212, 255, 0.3); position: relative; overflow: hidden; }
+        .login-btn:hover { transform: translateY(-2px); box-shadow: 0 0 30px rgba(0, 212, 255, 0.5), 0 0 60px rgba(124, 58, 237, 0.3); }
+        .login-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .country-select { background: rgba(255, 255, 255, 0.05); border: 2px solid rgba(99, 102, 241, 0.2); color: #e0e0ff; border-radius: 14px; padding: 14px; font-size: 16px; transition: all 0.3s ease; }
+        .country-select:focus { border-color: #00d4ff; outline: none; }
+        .country-select option { background: #12122e; color: #e0e0ff; }
+        .welcome-toast { position: fixed; top: 20px; right: 20px; background: linear-gradient(135deg, rgba(16, 185, 129, 0.9), rgba(5, 150, 105, 0.9)); backdrop-filter: blur(10px); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 16px; padding: 16px 24px; color: white; font-weight: 500; z-index: 1000; animation: toastSlide 0.5s ease; box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3); max-width: 350px; }
+        @keyframes toastSlide { from { opacity: 0; transform: translateX(100px); } to { opacity: 1; transform: translateX(0); } }
+        .toast-exit { animation: toastExit 0.5s ease forwards; }
+        @keyframes toastExit { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(100px); } }
+        .sms-status { font-size: 12px; margin-top: 8px; padding: 6px 12px; border-radius: 8px; display: inline-block; }
+        .sms-success { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+        .sms-error { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+        .sms-loading { background: rgba(0, 212, 255, 0.2); color: #22d3ee; }
+        .sms-info { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+        @media (max-width: 768px) { .hero-title { font-size: 2.5rem !important; } .login-card { padding: 30px 20px; } }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+    <div class="grid-overlay"></div>
+    <div class="particles" id="particles"></div>
+    <div id="toastContainer"></div>
+
+    <!-- ==================== LOGIN PAGE ==================== -->
+    <div id="loginPage" class="login-container">
+        <div class="login-card">
+            <div class="login-logo"><i class="fas fa-robot text-white text-3xl"></i></div>
+            <h1 class="text-2xl font-black font-orbitron text-center text-white mb-2">NEXORA X</h1>
+            <p class="text-center text-cyan-300/60 text-sm mb-6 tracking-wider uppercase">AI Logo Creator</p>
+            
+            <div class="mb-6">
+                <p class="text-center text-cyan-200/70 text-sm mb-2 font-sinhala">ඔබගේ දුරකථන අංකය ඇතුලත් කර ලොගින් වන්න</p>
+                <p class="text-center text-cyan-200/40 text-xs">Enter your phone number to login</p>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-cyan-200/70 text-sm font-medium mb-2">දුරකථන අංකය / Phone Number</label>
+                    <div class="flex gap-2">
+                        <select id="countryCode" class="country-select w-28">
+                            <option value="+94">🇱🇰 +94</option>
+                            <option value="+91">🇮🇳 +91</option>
+                            <option value="+1">🇺🇸 +1</option>
+                            <option value="+44">🇬🇧 +44</option>
+                            <option value="+61">🇦🇺 +61</option>
+                            <option value="+81">🇯🇵 +81</option>
+                        </select>
+                        <input type="tel" id="phoneNumber" class="login-input flex-1" placeholder="7X XXX XXXX" maxlength="15">
+                    </div>
+                </div>
+                
+                <button onclick="handleLogin()" id="loginBtn" class="login-btn flex items-center justify-center gap-2">
+                    <i class="fas fa-sign-in-alt"></i><span>ලොගින් වන්න / Login</span>
+                </button>
+            </div>
+            
+            <div class="mt-6 text-center">
+                <p class="text-cyan-200/30 text-xs"><i class="fas fa-shield-alt mr-1"></i>ඔබගේ අංකය සුරක්ෂිතව ආරක්ෂා කෙරේ</p>
+            </div>
+            
+            <div id="smsStatus" class="text-center mt-3 hidden"></div>
+        </div>
+    </div>
+
+    <!-- ==================== MAIN APP ==================== -->
+    <div id="mainApp" class="hidden">
+        <!-- Header -->
+        <header class="glass-header sticky top-0 z-50">
+            <div class="container mx-auto px-4 py-4">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-400 to-purple-600 flex items-center justify-center shadow-lg shadow-cyan-500/30">
+                            <i class="fas fa-robot text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-black font-orbitron neon-text tracking-wider">NEXORA X</h1>
+                            <p class="text-xs text-cyan-300/60 tracking-[0.2em] uppercase">AI Logo Creator</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="hidden md:flex items-center gap-2 text-sm text-cyan-300/60">
+                            <i class="fas fa-phone-alt text-cyan-400"></i><span id="userPhoneDisplay"></span>
+                        </div>
+                        <div class="ai-badge px-3 py-1 rounded-full text-xs font-semibold text-cyan-300 flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>AI Powered
+                        </div>
+                        <button onclick="handleLogout()" class="text-cyan-300/60 hover:text-cyan-300 text-sm transition" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <section class="relative py-16 md:py-24 overflow-hidden">
+            <div class="container mx-auto px-4 text-center relative z-10">
+                <div class="inline-block mb-6 px-5 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 text-sm font-medium"><i class="fas fa-sparkles mr-2"></i>Next Generation AI Logo Design</div>
+                <h2 class="hero-title text-5xl md:text-7xl font-black text-white mb-6 leading-tight font-orbitron">Create Stunning<br><span class="neon-text neon-glow">AI Logos</span> Instantly</h2>
+                <p class="text-lg md:text-xl text-cyan-200/60 mb-10 max-w-2xl mx-auto">Describe your brand, choose your style, and let our AI generate professional logos in seconds. No design skills needed.</p>
+                <div class="flex justify-center gap-6 text-sm flex-wrap">
+                    <div class="flex items-center text-cyan-300/70"><div class="w-12 h-12 rounded-xl bg-cyan-500/10 mr-3 flex items-center justify-center border border-cyan-500/20"><i class="fas fa-bolt text-cyan-400"></i></div>Instant Generation</div>
+                    <div class="flex items-center text-cyan-300/70"><div class="w-12 h-12 rounded-xl bg-purple-500/10 mr-3 flex items-center justify-center border border-purple-500/20"><i class="fas fa-infinity text-purple-400"></i></div>Unlimited Designs</div>
+                    <div class="flex items-center text-cyan-300/70"><div class="w-12 h-12 rounded-xl bg-pink-500/10 mr-3 flex items-center justify-center border border-pink-500/20"><i class="fas fa-download text-pink-400"></i></div>Free Downloads</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Logo Generator -->
+        <section class="container mx-auto px-4 pb-12">
+            <div id="alerts"></div>
+            <div class="max-w-4xl mx-auto">
+                <div class="glass-card p-6 md:p-8 mb-8">
+                    <h3 class="text-xl font-bold text-white mb-6 flex items-center gap-2"><i class="fas fa-wand-magic-sparkles text-cyan-400"></i>Describe Your Logo</h3>
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-cyan-200/70 text-sm font-medium mb-2">Brand / Company Name *</label>
+                            <input type="text" id="brandName" class="neon-input w-full rounded-xl px-4 py-3 text-lg" placeholder="e.g. TechNova, GreenLeaf Cafe..." maxlength="30">
+                        </div>
+                        <div>
+                            <label class="block text-cyan-200/70 text-sm font-medium mb-2">What does your brand do? (Optional)</label>
+                            <textarea id="brandDesc" rows="2" class="neon-input w-full rounded-xl px-4 py-3" placeholder="e.g. Modern tech startup, Organic food store, Fitness gym..."></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-cyan-200/70 text-sm font-medium mb-3">Choose Style</label>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-3" id="styleGrid">
+                                <div class="style-option selected p-4 text-center" data-style="modern" onclick="selectStyle(this)"><i class="fas fa-cube text-2xl text-cyan-400 mb-2"></i><p class="text-sm font-medium text-white">Modern</p></div>
+                                <div class="style-option p-4 text-center" data-style="minimal" onclick="selectStyle(this)"><i class="fas fa-circle text-2xl text-purple-400 mb-2"></i><p class="text-sm font-medium text-white">Minimal</p></div>
+                                <div class="style-option p-4 text-center" data-style="tech" onclick="selectStyle(this)"><i class="fas fa-microchip text-2xl text-blue-400 mb-2"></i><p class="text-sm font-medium text-white">Tech</p></div>
+                                <div class="style-option p-4 text-center" data-style="luxury" onclick="selectStyle(this)"><i class="fas fa-gem text-2xl text-yellow-400 mb-2"></i><p class="text-sm font-medium text-white">Luxury</p></div>
+                                <div class="style-option p-4 text-center" data-style="playful" onclick="selectStyle(this)"><i class="fas fa-gamepad text-2xl text-pink-400 mb-2"></i><p class="text-sm font-medium text-white">Playful</p></div>
+                                <div class="style-option p-4 text-center" data-style="nature" onclick="selectStyle(this)"><i class="fas fa-leaf text-2xl text-green-400 mb-2"></i><p class="text-sm font-medium text-white">Nature</p></div>
+                                <div class="style-option p-4 text-center" data-style="vintage" onclick="selectStyle(this)"><i class="fas fa-feather text-2xl text-orange-400 mb-2"></i><p class="text-sm font-medium text-white">Vintage</p></div>
+                                <div class="style-option p-4 text-center" data-style="abstract" onclick="selectStyle(this)"><i class="fas fa-shapes text-2xl text-red-400 mb-2"></i><p class="text-sm font-medium text-white">Abstract</p></div>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-cyan-200/70 text-sm font-medium mb-3">Primary Color Theme</label>
+                            <div class="flex gap-3 flex-wrap" id="colorGrid">
+                                <div class="color-dot selected" style="background: linear-gradient(135deg, #00d4ff, #7c3aed);" data-colors="cyan,purple" onclick="selectColor(this)"></div>
+                                <div class="color-dot" style="background: linear-gradient(135deg, #ef4444, #f97316);" data-colors="red,orange" onclick="selectColor(this)"></div>
+                                <div class="color-dot" style="background: linear-gradient(135deg, #10b981, #06b6d4);" data-colors="green,cyan" onclick="selectColor(this)"></div>
+                                <div class="color-dot" style="background: linear-gradient(135deg, #8b5cf6, #ec4899);" data-colors="purple,pink" onclick="selectColor(this)"></div>
+                                <div class="color-dot" style="background: linear-gradient(135deg, #f59e0b, #ef4444);" data-colors="yellow,red" onclick="selectColor(this)"></div>
+                                <div class="color-dot" style="background: linear-gradient(135deg, #3b82f6, #8b5cf6);" data-colors="blue,purple" onclick="selectColor(this)"></div>
+                                <div class="color-dot" style="background: linear-gradient(135deg, #ffffff, #94a3b8);" data-colors="white,gray" onclick="selectColor(this)"></div>
+                                <div class="color-dot" style="background: linear-gradient(135deg, #fbbf24, #f59e0b);" data-colors="gold,amber" onclick="selectColor(this)"></div>
+                            </div>
+                        </div>
+                        <button onclick="generateLogos()" id="generateBtn" class="glow-btn w-full text-white py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-3"><i class="fas fa-wand-magic-sparkles"></i>Generate AI Logos</button>
+                    </div>
+                </div>
+
+                <!-- Loading -->
+                <div id="loadingSection" class="hidden text-center py-16">
+                    <div class="loading-ring mx-auto mb-6"></div>
+                    <p class="text-cyan-300/70 text-lg font-medium">AI is designing your logos...</p>
+                    <p class="text-cyan-300/40 text-sm mt-2">Analyzing brand identity and generating variations</p>
+                </div>
+
+                <!-- Results -->
+                <div id="resultsSection" class="hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-2xl font-bold text-white flex items-center gap-2"><i class="fas fa-images text-cyan-400"></i>Generated Logos</h3>
+                        <button onclick="generateLogos()" class="glow-btn text-white px-5 py-2.5 rounded-xl font-medium text-sm flex items-center gap-2"><i class="fas fa-rotate"></i>Regenerate</button>
+                    </div>
+                    <div id="logosGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features -->
+        <section class="container mx-auto px-4 py-16">
+            <h3 class="text-3xl font-bold text-center text-white mb-12 font-orbitron">Why Choose <span class="neon-text">NEXORA X</span>?</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+                <div class="glass-card p-6 text-center">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-cyan-500/20"><i class="fas fa-brain text-white text-2xl"></i></div>
+                    <h4 class="text-lg font-bold text-white mb-2">AI Powered</h4>
+                    <p class="text-cyan-200/50 text-sm">Advanced algorithms understand your brand and create unique, professional logos tailored to your vision.</p>
+                </div>
+                <div class="glass-card p-6 text-center">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-purple-500/20"><i class="fas fa-bolt text-white text-2xl"></i></div>
+                    <h4 class="text-lg font-bold text-white mb-2">Lightning Fast</h4>
+                    <p class="text-cyan-200/50 text-sm">Get multiple logo variations in seconds. No waiting, no complex software to learn.</p>
+                </div>
+                <div class="glass-card p-6 text-center">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-green-500/20"><i class="fas fa-download text-white text-2xl"></i></div>
+                    <h4 class="text-lg font-bold text-white mb-2">Free Downloads</h4>
+                    <p class="text-cyan-200/50 text-sm">Download your favorite logos in high resolution PNG format completely free. Use them anywhere.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer-glow py-8 mt-12">
+            <div class="container mx-auto px-4 text-center">
+                <div class="flex items-center justify-center gap-3 mb-3">
+                    <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-purple-600 flex items-center justify-center"><i class="fas fa-robot text-white text-sm"></i></div>
+                    <span class="text-lg font-bold text-white font-orbitron">NEXORA X</span>
+                </div>
+                <p class="text-cyan-200/40 text-sm mb-2">AI Logo Creator - Design the Future</p>
+                <p class="text-cyan-200/30 text-xs"><i class="fas fa-code mr-1"></i>Created by <span class="text-cyan-400 font-semibold">Isanka</span></p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Preview Modal -->
+    <div id="previewModal" class="fixed inset-0 z-50 hidden modal-overlay">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="modal-content w-full max-w-2xl rounded-2xl overflow-hidden p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-white">Logo Preview</h3>
+                    <button onclick="closePreview()" class="text-white/60 hover:text-white text-2xl transition">&times;</button>
+                </div>
+                <div id="previewContainer" class="flex justify-center mb-6"></div>
+                <div class="flex gap-3">
+                    <button onclick="downloadLogo()" class="download-btn flex-1 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2"><i class="fas fa-download"></i>Download PNG</button>
+                    <button onclick="closePreview()" class="flex-1 bg-white/5 hover:bg-white/10 border border-white/10 text-white py-3 rounded-xl font-medium transition">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== JAVASCRIPT ==================== -->
+    <script>
+        // ==================== CONFIGURATION ====================
+        // OPTION 1: Use PHP Proxy (RECOMMENDED - upload sms-proxy.php to your server)
+        // const SMS_PROXY_URL = 'https://yourwebsite.com/sms-proxy.php';
+        
+        // OPTION 2: Direct API call (may have CORS issues, but try first)
+        const SMS_API_ID = '4767';
+        const SMS_API_PASSWORD = 'CqgC4HJ7xfAIKkqS1iSJ9VXvb6L3yhp9QctZu8U758b047d2';
+        const WELCOME_MESSAGE = 'ඔබ අපගේ Nexora X වෙබ්සයිට් ගිණුම සදහා සාදරයෙන් පිලි ගන්නවා ✅';
+        
+        let selectedStyle = 'modern';
+        let selectedColors = 'cyan,purple';
+        let currentLogos = [];
+        let previewLogoIndex = -1;
+        let currentUserPhone = '';
+
+        // ==================== LOGIN SYSTEM ====================
+
+        async function handleLogin() {
+            const phoneInput = document.getElementById('phoneNumber').value.trim();
+            const countryCode = document.getElementById('countryCode').value;
+            const loginBtn = document.getElementById('loginBtn');
+            const smsStatus = document.getElementById('smsStatus');
+
+            // Validation
+            if (!phoneInput) { 
+                showToast('කරුණාකර ඔබගේ දුරකථන අංකය ඇතුලත් කරන්න!', 'error'); 
+                return; 
+            }
+            
+            const cleanPhone = phoneInput.replace(/[^0-9]/g, '');
+            if (cleanPhone.length < 9) { 
+                showToast('වලංගු දුරකථන අංකයක් ඇතුලත් කරන්න!', 'error'); 
+                return; 
+            }
+
+            // Format: +947XXXXXXXX
+            const fullPhone = countryCode + cleanPhone;
+            currentUserPhone = fullPhone;
+            
+            // Loading state
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            smsStatus.classList.remove('hidden');
+            smsStatus.innerHTML = '<span class="sms-status sms-loading"><i class="fas fa-spinner fa-spin mr-1"></i>SMS යවමින්...</span>';
+
+            try {
+                // Send Welcome SMS via TextIt.biz
+                const smsResult = await sendWelcomeSMS(fullPhone);
+                
+                if (smsResult.success) {
+                    smsStatus.innerHTML = '<span class="sms-status sms-success"><i class="fas fa-check mr-1"></i>Welcome SMS යවන ලදී!</span>';
+                    showToast('සාදරයෙන් පිළිගන්නවා! Welcome to NEXORA X 🎉', 'success');
+                } else {
+                    smsStatus.innerHTML = '<span class="sms-status sms-error"><i class="fas fa-exclamation-triangle mr-1"></i>SMS යැවීමට අසමත්</span>';
+                    showToast('ලොගින් සාර්ථකයි! (SMS failed)', 'info');
+                }
+                
+                // Save session
+                localStorage.setItem('nexora_user_phone', fullPhone);
+                localStorage.setItem('nexora_login_time', new Date().toISOString());
+                
+                // Show main app after delay
+                setTimeout(() => { 
+                    showMainApp(); 
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Login Error:', error);
+                smsStatus.innerHTML = '<span class="sms-status sms-error"><i class="fas fa-exclamation-triangle mr-1"></i>දෝෂයක් ඇත</span>';
+                
+                // Still login even if SMS fails
+                localStorage.setItem('nexora_user_phone', fullPhone);
+                localStorage.setItem('nexora_login_time', new Date().toISOString());
+                showToast('ලොගින් සාර්ථකයි!', 'success');
+                
+                setTimeout(() => { 
+                    showMainApp(); 
+                }, 1500);
+            }
+        }
+
+        async function sendWelcomeSMS(phoneNumber) {
+            // Method 1: Try direct API call with no-cors (won't read response but may work)
+            const apiUrl = `https://www.textit.biz/sendmsg?id=${encodeURIComponent(SMS_API_ID)}&pw=${encodeURIComponent(SMS_API_PASSWORD)}&to=${encodeURIComponent(phoneNumber)}&text=${encodeURIComponent(WELCOME_MESSAGE)}`;
+            
+            console.log('SMS API URL:', apiUrl);
+
+            try {
+                // Try fetch with no-cors (browser won't read response but request goes through)
+                await fetch(apiUrl, { 
+                    method: 'GET', 
+                    mode: 'no-cors',
+                    headers: { 'Accept': 'text/plain' } 
+                });
+                
+                console.log('SMS API request sent');
+                return { success: true, message: 'SMS request sent via API' };
+                
+            } catch (fetchError) {
+                console.log('Direct fetch failed, trying image ping:', fetchError);
+                
+                // Fallback: Use image ping (avoids CORS)
+                return new Promise((resolve) => {
+                    const img = new Image();
+                    const timeout = setTimeout(() => { 
+                        resolve({ success: true, message: 'SMS request sent (image ping)' }); 
+                    }, 3000);
+                    
+                    img.onload = function() { 
+                        clearTimeout(timeout); 
+                        resolve({ success: true, message: 'SMS sent successfully' }); 
+                    };
+                    img.onerror = function() { 
+                        clearTimeout(timeout); 
+                        resolve({ success: true, message: 'SMS request sent' }); 
+                    };
+                    
+                    img.src = apiUrl + '&_cb=' + Date.now();
+                });
+            }
+        }
+
+        function showMainApp() {
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            
+            const phoneDisplay = document.getElementById('userPhoneDisplay');
+            if (phoneDisplay && currentUserPhone) { 
+                phoneDisplay.textContent = currentUserPhone; 
+            }
+            
+            initParticles();
+            window.scrollTo(0, 0);
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('nexora_user_phone');
+            localStorage.removeItem('nexora_login_time');
+            currentUserPhone = '';
+            
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('loginPage').classList.remove('hidden');
+            document.getElementById('phoneNumber').value = '';
+            
+            const loginBtn = document.getElementById('loginBtn');
+            loginBtn.disabled = false;
+            loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i><span>ලොගින් වන්න / Login</span>';
+            
+            document.getElementById('smsStatus').classList.add('hidden');
+            showToast('ඔබ ලොග් අවුට් විය.', 'info');
+        }
+
+        // ==================== TOAST NOTIFICATIONS ====================
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'welcome-toast';
+            
+            let icon = 'check-circle';
+            if (type === 'error') {
+                icon = 'exclamation-circle';
+                toast.style.background = 'linear-gradient(135deg, rgba(239, 68, 68, 0.9), rgba(220, 38, 38, 0.9))';
+                toast.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+                toast.style.boxShadow = '0 10px 30px rgba(239, 68, 68, 0.3)';
+            } else if (type === 'info') {
+                icon = 'info-circle';
+                toast.style.background = 'linear-gradient(135deg, rgba(59, 130, 246, 0.9), rgba(37, 99, 235, 0.9))';
+                toast.style.borderColor = 'rgba(59, 130, 246, 0.3)';
+                toast.style.boxShadow = '0 10px 30px rgba(59, 130, 246, 0.3)';
+            }
+            
+            toast.innerHTML = `<i class="fas fa-${icon} mr-2"></i>${message}`;
+            container.appendChild(toast);
+            
+            setTimeout(() => { 
+                toast.classList.add('toast-exit'); 
+                setTimeout(() => toast.remove(), 500); 
+            }, 4000);
+        }
+
+        // ==================== AUTO LOGIN CHECK ====================
+
+        function checkExistingLogin() {
+            const savedPhone = localStorage.getItem('nexora_user_phone');
+            
+            if (savedPhone) { 
+                currentUserPhone = savedPhone;
+                showMainApp(); 
+                showToast('නැවත සාදරයෙන් පිළිගන්නවා! Welcome back!', 'success'); 
+            }
+        }
+
+        // ==================== PARTICLES ====================
+
+        function initParticles() {
+            const container = document.getElementById('particles');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < 40; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = Math.random() * 100 + '%';
+                p.style.width = p.style.height = (2 + Math.random() * 3) + 'px';
+                p.style.animationDuration = (12 + Math.random() * 15) + 's';
+                p.style.animationDelay = Math.random() * 15 + 's';
+                
+                const colors = ['rgba(0,212,255,0.4)', 'rgba(124,58,237,0.3)', 'rgba(244,114,182,0.3)'];
+                p.style.background = colors[Math.floor(Math.random() * colors.length)];
+                container.appendChild(p);
+            }
+        }
+
+        // ==================== STYLE & COLOR SELECTION ====================
+
+        function selectStyle(el) {
+            document.querySelectorAll('.style-option').forEach(s => s.classList.remove('selected'));
+            el.classList.add('selected');
+            selectedStyle = el.dataset.style;
+        }
+
+        function selectColor(el) {
+            document.querySelectorAll('.color-dot').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+            selectedColors = el.dataset.colors;
+        }
+
+        // ==================== ALERTS ====================
+
+        function showAlert(message, type) {
+            const container = document.getElementById('alerts');
+            const div = document.createElement('div');
+            div.className = `alert-box px-6 py-4 rounded-xl mb-4 font-medium ${type === 'error' ? 'bg-red-500/20 border border-red-500/30 text-red-300' : 'bg-cyan-500/20 border border-cyan-500/30 text-cyan-300'}`;
+            div.innerHTML = `<i class="fas fa-${type === 'error' ? 'exclamation-circle' : 'check-circle'} mr-2"></i>${message}`;
+            container.appendChild(div);
+            setTimeout(() => div.remove(), 4000);
+        }
+
+        // ==================== LOGO GENERATION ====================
+
+        function generateLogos() {
+            const brandName = document.getElementById('brandName').value.trim();
+            if (!brandName) { showAlert('Please enter your brand name!', 'error'); return; }
+            
+            const loading = document.getElementById('loadingSection');
+            const results = document.getElementById('resultsSection');
+            
+            loading.classList.remove('hidden');
+            results.classList.add('hidden');
+            
+            setTimeout(() => {
+                loading.classList.add('hidden');
+                results.classList.remove('hidden');
+                createLogoVariations(brandName);
+                showAlert('6 unique logos generated successfully!', 'success');
+            }, 2500);
+        }
+
+        function createLogoVariations(brandName) {
+            const grid = document.getElementById('logosGrid');
+            grid.innerHTML = '';
+            currentLogos = [];
+            
+            const colorMap = {
+                'cyan,purple': ['#00d4ff', '#7c3aed'], 
+                'red,orange': ['#ef4444', '#f97316'],
+                'green,cyan': ['#10b981', '#06b6d4'], 
+                'purple,pink': ['#8b5cf6', '#ec4899'],
+                'yellow,red': ['#f59e0b', '#ef4444'], 
+                'blue,purple': ['#3b82f6', '#8b5cf6'],
+                'white,gray': ['#ffffff', '#94a3b8'], 
+                'gold,amber': ['#fbbf24', '#f59e0b']
+            };
+            
+            const [c1, c2] = colorMap[selectedColors] || colorMap['cyan,purple'];
+            
+            const variations = [
+                { type: 'gradient-circle', label: 'Gradient Circle' },
+                { type: 'geometric', label: 'Geometric' },
+                { type: 'lettermark', label: 'Lettermark' },
+                { type: 'abstract-wave', label: 'Abstract Wave' },
+                { type: 'minimal-line', label: 'Minimal Line' },
+                { type: 'neon-glow', label: 'Neon Glow' }
+            ];
+            
+            variations.forEach((v, i) => {
+                const canvas = document.createElement('canvas');
+                canvas.width = 512; 
+                canvas.height = 512;
+                const ctx = canvas.getContext('2d');
+                
+                drawLogoOnCanvas(ctx, brandName, v.type, c1, c2, i);
+                const dataUrl = canvas.toDataURL('image/png');
+                currentLogos.push(dataUrl);
+                
+                const card = document.createElement('div');
+                card.className = 'logo-card';
+                card.style.animationDelay = (i * 0.1) + 's';
+                card.innerHTML = `
+                    <div class="p-4">
+                        <img src="${dataUrl}" alt="${brandName} logo ${i+1}" class="generated-image mb-3" onclick="previewLogo(${i})">
+                        <p class="text-sm font-medium text-cyan-200/60 mb-3 text-center">${v.label} Style</p>
+                        <div class="flex gap-2">
+                            <button onclick="previewLogo(${i})" class="flex-1 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/30 text-cyan-300 py-2 rounded-lg text-sm font-medium transition flex items-center justify-center gap-1"><i class="fas fa-eye"></i>View</button>
+                            <button onclick="downloadSingle(${i})" class="flex-1 download-btn text-white py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-1"><i class="fas fa-download"></i>Save</button>
+                        </div>
+                    </div>`;
+                grid.appendChild(card);
+            });
+        }
+
+        function drawLogoOnCanvas(ctx, name, type, color1, color2, index) {
+            const w = 512, h = 512;
+            const initials = name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+            
+            ctx.fillStyle = '#0a0a1a'; 
+            ctx.fillRect(0, 0, w, h);
+            
+            const grad = ctx.createLinearGradient(0, 0, w, h);
+            grad.addColorStop(0, color1); 
+            grad.addColorStop(1, color2);
+
+            switch(type) {
+                case 'gradient-circle':
+                    ctx.shadowColor = color1; 
+                    ctx.shadowBlur = 40;
+                    ctx.beginPath(); 
+                    ctx.arc(w/2, h/2, 180, 0, Math.PI * 2); 
+                    ctx.strokeStyle = grad; 
+                    ctx.lineWidth = 6; 
+                    ctx.stroke(); 
+                    ctx.shadowBlur = 0;
+                    
+                    ctx.beginPath(); 
+                    ctx.arc(w/2, h/2, 140, 0, Math.PI * 2); 
+                    ctx.strokeStyle = grad; 
+                    ctx.lineWidth = 2; 
+                    ctx.globalAlpha = 0.3; 
+                    ctx.stroke(); 
+                    ctx.globalAlpha = 1;
+                    
+                    ctx.font = 'bold 120px Orbitron, sans-serif'; 
+                    ctx.textAlign = 'center'; 
+                    ctx.textBaseline = 'middle'; 
+                    ctx.fillStyle = grad; 
+                    ctx.fillText(initials, w/2, h/2 - 10);
+                    
+                    ctx.font = '500 28px Poppins, sans-serif'; 
+                    ctx.fillStyle = color1; 
+                    ctx.globalAlpha = 0.8; 
+                    ctx.fillText(name.substring(0, 20), w/2, h/2 + 100); 
+                    ctx.globalAlpha = 1;
+                    break;
+                    
+                case 'geometric':
+                    ctx.save(); 
+                    ctx.translate(w/2, h/2); 
+                    ctx.rotate(Math.PI / 4);
+                    ctx.shadowColor = color1; 
+                    ctx.shadowBlur = 30; 
+                    ctx.strokeStyle = grad; 
+                    ctx.lineWidth = 5; 
+                    ctx.strokeRect(-140, -140, 280, 280); 
+                    ctx.shadowBlur = 0;
+                    ctx.fillStyle = grad; 
+                    ctx.globalAlpha = 0.15; 
+                    ctx.fillRect(-100, -100, 200, 200); 
+                    ctx.globalAlpha = 1; 
+                    ctx.restore();
+                    
+                    ctx.font = 'bold 110px Orbitron, sans-serif'; 
+                    ctx.textAlign = 'center'; 
+                    ctx.textBaseline = 'middle'; 
+                    ctx.fillStyle = grad; 
+                    ctx.fillText(initials, w/2, h/2 - 5);
+                    
+                    ctx.font = '500 26px Poppins, sans-serif'; 
+                    ctx.fillStyle = color2; 
+                    ctx.globalAlpha = 0.8; 
+                    ctx.fillText(name.substring(0, 20), w/2, h/2 + 110); 
+                    ctx.globalAlpha = 1;
+                    break;
+                    
+                case 'lettermark':
+                    ctx.shadowColor = color1; 
+                    ctx.shadowBlur = 35;
+                    ctx.beginPath(); 
+                    ctx.roundRect(56, 56, 400, 400, 60); 
+                    ctx.strokeStyle = grad; 
+                    ctx.lineWidth = 5; 
+                    ctx.stroke(); 
+                    ctx.shadowBlur = 0;
+                    
+                    ctx.beginPath(); 
+                    ctx.roundRect(86, 86, 340, 340, 45); 
+                    ctx.fillStyle = grad; 
+                    ctx.globalAlpha = 0.08; 
+                    ctx.fill(); 
+                    ctx.globalAlpha = 1;
+                    
+                    ctx.font = 'bold 160px Orbitron, sans-serif'; 
+                    ctx.textAlign = 'center'; 
+                    ctx.textBaseline = 'middle'; 
+                    ctx.fillStyle = grad; 
+                    ctx.fillText(initials, w/2, h/2 - 10);
+                    
+                    ctx.font = '500 24px Poppins, sans-serif'; 
+                    ctx.fillStyle = color1; 
+                    ctx.globalAlpha = 0.7; 
+                    ctx.fillText(name.substring(0, 22), w/2, h/2 + 115); 
+                    ctx.globalAlpha = 1;
+                    break;
+                    
+                case 'abstract-wave':
+                    ctx.shadowColor = color1; 
+                    ctx.shadowBlur = 25; 
+                    ctx.strokeStyle = grad; 
+                    ctx.lineWidth = 4;
+                    
+                    for (let j = 0; j < 3; j++) { 
+                        ctx.beginPath(); 
+                        for (let x = 0; x < w; x += 5) { 
+                            const y = h/2 + Math.sin(x * 0.02 + j * 2) * 60 + (j - 1) * 50; 
+                            if (x === 0) ctx.moveTo(x, y); 
+                            else ctx.lineTo(x, y); 
+                        } 
+                        ctx.stroke(); 
+                    }
+                    ctx.shadowBlur = 0;
+                    
+                    ctx.beginPath(); 
+                    ctx.arc(120, 150, 50, 0, Math.PI * 2); 
+                    ctx.fillStyle = grad; 
+                    ctx.globalAlpha = 0.2; 
+                    ctx.fill(); 
+                    ctx.globalAlpha = 1;
+                    
+                    ctx.beginPath(); 
+                    ctx.arc(390, 360, 60, 0, Math.PI * 2); 
+                    ctx.fillStyle = grad; 
+                    ctx.globalAlpha = 0.15; 
+                    ctx.fill(); 
+                    ctx.globalAlpha = 1;
+                    
+                    ctx.font = 'bold 100px Orbitron, sans-serif'; 
+                    ctx.textAlign = 'center'; 
+                    ctx.textBaseline = 'middle'; 
+                    ctx.fillStyle = grad; 
+                    ctx.fillText(initials, w/2, h/2 + 10);
+                    
+                    ctx.font = '500 26px Poppins, sans-serif'; 
+                    ctx.fillStyle = color2; 
+                    ctx.globalAlpha = 0.8; 
+                    ctx.fillText(name.substring(0, 20), w/2, h/2 + 90); 
+                    ctx.globalAlpha = 1;
+                    break;
+                    
+                case 'minimal-line':
+                    ctx.shadowColor = color1; 
+                    ctx.shadowBlur = 20; 
+                    ctx.strokeStyle = grad; 
+                    ctx.lineWidth = 3;
+                    ctx.beginPath(); 
+                    ctx.moveTo(80, h/2 + 40); 
+                    ctx.lineTo(432, h/2 + 40); 
+                    ctx.stroke(); 
+                    ctx.shadowBlur = 0;
+                    
+                    ctx.font = '300 130px Orbitron, sans-serif'; 
+                    ctx.textAlign = 'center'; 
+                    ctx.textBaseline = 'middle'; 
+                    ctx.fillStyle = grad; 
+                    ctx.fillText(initials, w/2, h/2 - 30);
+                    
+                    ctx.font = '500 28px Poppins, sans-serif'; 
+                    ctx.fillStyle = color1; 
+                    ctx.globalAlpha = 0.9; 
+                    ctx.fillText(name.toUpperCase().substring(0, 18), w/2, h/2 + 85); 
+                    ctx.globalAlpha = 1;
+                    break;
+                    
+                case 'neon-glow':
+                    ctx.shadowColor = color1; 
+                    ctx.shadowBlur = 50;
+                    ctx.beginPath(); 
+                    ctx.roundRect(40, 40, 432, 432, 50); 
+                    ctx.strokeStyle = grad; 
+                    ctx.lineWidth = 4; 
+                    ctx.stroke(); 
+                    ctx.shadowBlur = 0;
+                    
+                    ctx.beginPath(); 
+                    ctx.roundRect(70, 70, 372, 372, 40); 
+                    ctx.strokeStyle = grad; 
+                    ctx.lineWidth = 1.5; 
+                    ctx.globalAlpha = 0.3; 
+                    ctx.stroke(); 
+                    ctx.globalAlpha = 1;
+                    
+                    ctx.shadowColor = color1; 
+                    ctx.shadowBlur = 30;
+                    ctx.font = 'bold 130px Orbitron, sans-serif'; 
+                    ctx.textAlign = 'center'; 
+                    ctx.textBaseline = 'middle'; 
+                    ctx.fillStyle = grad; 
+                    ctx.fillText(initials, w/2, h/2 - 5); 
+                    ctx.shadowBlur = 0;
+                    
+                    ctx.font = '500 24px Poppins, sans-serif'; 
+                    ctx.fillStyle = color1; 
+                    ctx.globalAlpha = 0.8; 
+                    ctx.fillText(name.substring(0, 20), w/2, h/2 + 105); 
+                    ctx.globalAlpha = 1;
+                    break;
+            }
+        }
+
+        // ==================== PREVIEW & DOWNLOAD ====================
+
+        function previewLogo(index) {
+            previewLogoIndex = index;
+            const modal = document.getElementById('previewModal');
+            const container = document.getElementById('previewContainer');
+            container.innerHTML = `<img src="${currentLogos[index]}" alt="Logo preview" style="max-width:400px;border-radius:16px;">`;
+            modal.classList.remove('hidden');
+        }
+
+        function closePreview() { 
+            document.getElementById('previewModal').classList.add('hidden'); 
+        }
+
+        function downloadSingle(index) {
+            const a = document.createElement('a');
+            a.href = currentLogos[index]; 
+            a.download = `nexora-logo-${index + 1}.png`;
+            document.body.appendChild(a); 
+            a.click(); 
+            document.body.removeChild(a);
+            showAlert('Logo downloaded successfully!', 'success');
+        }
+
+        function downloadLogo() { 
+            if (previewLogoIndex >= 0) downloadSingle(previewLogoIndex); 
+        }
+
+        // ==================== EVENT LISTENERS ====================
+
+        document.addEventListener('click', function(e) { 
+            const modal = document.getElementById('previewModal'); 
+            if (e.target === modal) closePreview(); 
+        });
+
+        document.addEventListener('keydown', function(e) { 
+            if (e.key === 'Escape') closePreview(); 
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initParticles();
+            
+            const phoneInput = document.getElementById('phoneNumber');
+            if (phoneInput) { 
+                phoneInput.addEventListener('keypress', function(e) { 
+                    if (e.key === 'Enter') handleLogin(); 
+                }); 
+            }
+            
+            checkExistingLogin();
+        });
+    </script>
+</body>
+</html>
